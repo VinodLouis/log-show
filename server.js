@@ -10,14 +10,15 @@ function send404(response){
 }
 
 function updateFileContent(isFileChanged){
-    let fileContent = fs.readFileSync('file.log','utf8');
-    let allLines = fileContent.split("\n");
+  getLines("file.log", function (err, allLines) {
+    //console.log(err);
+    //console.log(allLines);
     if(isFileChanged){
         io.emit('data', {content:allLines.slice(allLines.indexOf(lastThrreLine[lastThrreLine.length-1])+1).join("\n")}); // short form   
     }
     lastThrreLine = (allLines.length > 3) ? allLines.slice(allLines.length-3) : allLines;
+  });
 }
-
 
 const mimeLookup = {
   '.html': 'text/html',
@@ -70,3 +71,32 @@ io.sockets.on("connection",(socket)=>{
     console.log("connection received");
     socket.emit("data",{content:lastThrreLine.join("\n")});
 })
+
+
+
+
+function getLines (filename, callback) {
+  let stream = fs.createReadStream(filename, {
+    flags: "r",
+    encoding: "utf-8",
+    fd: null,
+    mode: 438, // 0666 in Octal
+    bufferSize: 64 * 1024
+  });
+
+  let data = "";
+  let lines = [];
+  stream.on("data", function (moreData) {
+    data += moreData;
+    lines = data.split("\n");
+  });
+
+  stream.on("error", function () {
+    callback("Error");
+  });
+
+  stream.on("end", function () {
+    callback(false, lines);
+  });
+
+};
