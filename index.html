@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title></title>
+        <script type="text/javascript" src="./node_modules/socket.io-client/dist/socket.io.js"></script>
+    </head>
+    <body onload="ready()">
+        <h1>LOGS</h1>
+        <textarea id="textarea1" style="width:100%;height:800px"></textarea>
+    </body>
+    <script>
+        function addtxt(input,val) {
+            var obj=document.getElementById(input)
+            var txt=document.createTextNode("\n" + val);
+            obj.appendChild(txt)
+        }
+        function ready(){
+            var socket = io.connect("http://localhost:3000");
+
+            socket.on('data',(d)=>{
+                console.log(d);
+                addtxt("textarea1",d.content);
+            })
+        }
+    </script>
+</html>
